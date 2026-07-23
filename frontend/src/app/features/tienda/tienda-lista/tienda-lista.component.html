@@ -1,0 +1,23 @@
+<div class="contenedor">
+  <h1>Productos grabados a láser</h1>
+
+  @if (cargando()) {
+    <p>Cargando productos...</p>
+  } @else if (productos().length === 0) {
+    <p>No hay productos disponibles por el momento.</p>
+  } @else {
+    <div class="grilla">
+      @for (producto of productos(); track producto.id) {
+        <a class="tarjeta tarjeta-producto" [routerLink]="['/productos', producto.id]">
+          @if (imagenPrincipal(producto); as url) {
+            <img [src]="archivosUrl + url" [alt]="producto.nombre" />
+          } @else {
+            <div class="sin-imagen">Sin imagen</div>
+          }
+          <h3>{{ producto.nombre }}</h3>
+          <p class="precio">{{ producto.precioBase | colones }}</p>
+        </a>
+      }
+    </div>
+  }
+</div>

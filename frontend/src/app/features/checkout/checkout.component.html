@@ -1,0 +1,69 @@
+<div class="contenedor">
+  <h1>Finalizar pedido</h1>
+
+  <div class="tarjeta seccion">
+    <h2>1. Dirección de entrega (Correos de Costa Rica)</h2>
+
+    @if (direcciones().length > 0 && !mostrarNuevaDireccion()) {
+      @for (direccion of direcciones(); track direccion.id) {
+        <label class="opcion-direccion">
+          <input
+            type="radio"
+            name="direccion"
+            [value]="direccion.id"
+            [checked]="direccionId() === direccion.id"
+            (change)="direccionId.set(direccion.id)"
+          />
+          {{ direccion.senasExactas }}, {{ direccion.distrito }}, {{ direccion.canton }}, {{ direccion.provincia }}
+        </label>
+      }
+      <button type="button" class="boton-secundario" (click)="mostrarNuevaDireccion.set(true)">
+        Usar otra dirección
+      </button>
+    } @else {
+      <div class="campo">
+        <label>Provincia</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.provincia" />
+      </div>
+      <div class="campo">
+        <label>Cantón</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.canton" />
+      </div>
+      <div class="campo">
+        <label>Distrito</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.distrito" />
+      </div>
+      <div class="campo">
+        <label>Señas exactas</label>
+        <textarea [(ngModel)]="nuevaDireccion.senasExactas"></textarea>
+      </div>
+      <div class="campo">
+        <label>Código postal (opcional)</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.codigoPostal" />
+      </div>
+      <button type="button" class="boton" (click)="guardarNuevaDireccion()">Guardar dirección</button>
+    }
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>2. Comprobante de pago (SINPE Móvil o transferencia)</h2>
+    <p>Sube una imagen o PDF del comprobante de tu pago.</p>
+    <input type="file" accept="image/*,application/pdf" (change)="onComprobante($event)" />
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Resumen</h2>
+    @for (item of carrito.listaItems(); track $index) {
+      <p>{{ item.cantidad }} x {{ item.nombreProducto }} — {{ item.atributosDescripcion }}</p>
+    }
+    <p class="total">Total: {{ carrito.total() | colones }}</p>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  <button type="button" class="boton" [disabled]="!puedeConfirmar()" (click)="confirmar()">
+    {{ enviando() ? 'Enviando...' : 'Confirmar pedido' }}
+  </button>
+</div>

@@ -1,0 +1,32 @@
+.seccion {
+  margin-top: 1.5rem;
+
+  h2 {
+    margin-top: 0;
+  }
+}
+
+.detalle-item {
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 0;
+
+  p {
+    margin: 0.15rem 0;
+  }
+}
+
+.total {
+  font-weight: 700;
+  margin-top: 0.75rem;
+}
+
+.historial {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+  }
+}

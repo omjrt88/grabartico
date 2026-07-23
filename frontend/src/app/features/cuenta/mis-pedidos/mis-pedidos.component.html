@@ -1,0 +1,20 @@
+<div class="contenedor">
+  <h1>Mis pedidos</h1>
+
+  @if (pedidos().length === 0) {
+    <p>Todavía no has hecho ningún pedido.</p>
+  } @else {
+    <div class="lista">
+      @for (pedido of pedidos(); track pedido.id) {
+        <a class="tarjeta pedido" [routerLink]="['/cuenta/pedidos', pedido.id]">
+          <div>
+            <p><strong>Pedido #{{ pedido.id.slice(0, 8) }}</strong></p>
+            <p>{{ pedido.createdAt | date: 'dd/MM/yyyy' }}</p>
+          </div>
+          <span class="etiqueta-estado">{{ etiquetas[pedido.estado] }}</span>
+          <p class="total">{{ pedido.total | colones }}</p>
+        </a>
+      }
+    </div>
+  }
+</div>

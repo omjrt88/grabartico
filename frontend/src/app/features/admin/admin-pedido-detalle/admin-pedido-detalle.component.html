@@ -1,0 +1,85 @@
+<div class="contenedor" *ngIf="pedido() as p">
+  <h1>Pedido #{{ p.id.slice(0, 8) }}</h1>
+  <span class="etiqueta-estado">{{ etiquetas[p.estado] }}</span>
+
+  <div class="tarjeta seccion">
+    <h2>Comprobante de pago</h2>
+    @if (p.comprobanteUrl) {
+      <a [href]="archivosUrl + p.comprobanteUrl" target="_blank" rel="noopener">Ver comprobante</a>
+    }
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Artículos</h2>
+    @for (detalle of p.detalles; track detalle.id) {
+      <div class="detalle-item">
+        <p><strong>{{ detalle.cantidad }} x {{ detalle.producto.nombre }}</strong></p>
+        <p>
+          @for (atributo of detalle.atributosElegidos; track atributo.id) {
+            {{ atributo.atributoValor.atributoTipo.nombre }}: {{ atributo.atributoValor.valor }}{{ ' ' }}
+          }
+        </p>
+        <p>
+          Grabado:
+          @if (detalle.tipoGrabado === 'SUBIDO_CLIENTE' && detalle.grabadoUrl) {
+            <a [href]="archivosUrl + detalle.grabadoUrl" target="_blank" rel="noopener">Ver archivo del cliente</a>
+          } @else {
+            Diseño predeterminado
+          }
+        </p>
+      </div>
+    }
+    <p class="total">Total: {{ p.total | colones }}</p>
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Actualizar estado</h2>
+    @if (opcionesEstado().length === 0) {
+      <p>Este pedido ya está en su estado final.</p>
+    } @else {
+      <div class="campo">
+        <label>Nuevo estado</label>
+        <select [(ngModel)]="nuevoEstado">
+          <option value="" disabled>Selecciona...</option>
+          @for (estado of opcionesEstado(); track estado) {
+            <option [value]="estado">{{ etiquetas[estado] }}</option>
+          }
+        </select>
+      </div>
+
+      @if (nuevoEstado === 'ENVIADO') {
+        <div class="campo">
+          <label>Tracking Correos de Costa Rica</label>
+          <input type="text" [(ngModel)]="trackingCorreos" />
+        </div>
+      }
+
+      <div class="campo">
+        <label>Nota (opcional)</label>
+        <textarea [(ngModel)]="nota"></textarea>
+      </div>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <button type="button" class="boton" [disabled]="guardando()" (click)="aplicarEstado()">
+        {{ guardando() ? 'Guardando...' : 'Aplicar' }}
+      </button>
+    }
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Historial</h2>
+    <ul class="historial">
+      @for (evento of p.historial; track evento.id) {
+        <li>
+          <strong>{{ etiquetas[evento.estado] }}</strong> — {{ evento.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          @if (evento.nota) {
+            <div>{{ evento.nota }}</div>
+          }
+        </li>
+      }
+    </ul>
+  </div>
+</div>

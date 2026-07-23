@@ -1,0 +1,104 @@
+<div class="contenedor" *ngIf="producto() as p">
+  <h1>Editar: {{ p.nombre }}</h1>
+
+  <div class="tarjeta seccion">
+    <h2>Datos generales</h2>
+    <div class="campo">
+      <label>Nombre</label>
+      <input type="text" [(ngModel)]="edicion.nombre" />
+    </div>
+    <div class="campo">
+      <label>Descripción</label>
+      <textarea [(ngModel)]="edicion.descripcion"></textarea>
+    </div>
+    <div class="campo">
+      <label>Precio base (₡)</label>
+      <input type="number" [(ngModel)]="edicion.precioBase" />
+    </div>
+    <button type="button" class="boton" (click)="guardarDatos()">Guardar cambios</button>
+
+    <div class="campo stock">
+      <label>Stock</label>
+      <input type="number" [(ngModel)]="edicion.stock" />
+      <button type="button" class="boton-secundario" (click)="actualizarStock()">Actualizar stock</button>
+    </div>
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Características (Material, Color, Forma)</h2>
+
+    @for (tipo of tiposAtributo(); track tipo.id) {
+      <div class="grupo-tipo">
+        <h3>{{ tipo.nombre }}</h3>
+        <div class="valores">
+          @for (valor of tipo.valores; track valor.id) {
+            <div class="valor-fila">
+              <span>{{ valor.valor }}</span>
+              @if (yaAsignado(valor.id)) {
+                <span class="etiqueta-estado">Asignado</span>
+              } @else {
+                <input
+                  type="number"
+                  placeholder="Modificador ₡"
+                  [(ngModel)]="nuevoModificador[valor.id]"
+                  name="mod-{{ valor.id }}"
+                />
+                <button type="button" class="boton-secundario" (click)="asignar(valor.id)">Asignar a este producto</button>
+              }
+            </div>
+          }
+        </div>
+        <div class="agregar-valor">
+          <input type="text" placeholder="Nuevo valor" [(ngModel)]="nuevoValorPorTipo[tipo.id]" name="valor-{{ tipo.id }}" />
+          <button type="button" class="boton-secundario" (click)="crearValor(tipo.id)">Agregar valor</button>
+        </div>
+      </div>
+    }
+
+    <div class="agregar-tipo">
+      <input type="text" placeholder="Nuevo tipo de característica" [(ngModel)]="nuevoTipoNombre" />
+      <button type="button" class="boton-secundario" (click)="crearTipo()">Agregar tipo</button>
+    </div>
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Imágenes del carrusel</h2>
+    <div class="galeria">
+      @for (imagen of p.imagenes; track imagen.id) {
+        <img [src]="archivosUrl + imagen.url" [alt]="p.nombre" class="miniatura" />
+      }
+    </div>
+
+    <div class="subir-imagen">
+      <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)" />
+      <p>Marca las características para las que aplica esta imagen:</p>
+      <div class="valores">
+        @for (av of p.atributoValores; track av.id) {
+          <label>
+            <input type="checkbox" [(ngModel)]="imagenAtributos[av.atributoValorId]" />
+            {{ av.atributoValor.atributoTipo?.nombre }}: {{ av.atributoValor.valor }}
+          </label>
+        }
+      </div>
+      <button type="button" class="boton" (click)="subirImagen()">Subir imagen</button>
+    </div>
+  </div>
+
+  <div class="tarjeta seccion">
+    <h2>Diseños predeterminados de grabado</h2>
+    <div class="galeria">
+      @for (diseno of p.disenos; track diseno.id) {
+        <div class="diseno">
+          <img [src]="archivosUrl + diseno.url" [alt]="diseno.nombre" class="miniatura" />
+          <span>{{ diseno.nombre }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="subir-imagen">
+      <input type="text" placeholder="Nombre del diseño" [(ngModel)]="disenoNombre" />
+      <input type="file" accept="image/*" (change)="onDisenoSeleccionado($event)" />
+      <button type="button" class="boton" (click)="subirDiseno()">Subir diseño</button>
+    </div>
+  </div>
+</div>

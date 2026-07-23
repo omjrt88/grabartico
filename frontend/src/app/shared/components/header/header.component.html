@@ -1,0 +1,18 @@
+<header class="encabezado">
+  <a routerLink="/" class="marca">Grabartico</a>
+
+  <nav class="nav">
+    <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }">Tienda</a>
+    <a routerLink="/carrito" routerLinkActive="activo">Carrito ({{ carrito.cantidadTotal() }})</a>
+
+    @if (auth.estaAutenticado()) {
+      <a routerLink="/cuenta/pedidos" routerLinkActive="activo">Mis Pedidos</a>
+      @if (auth.esAdmin()) {
+        <a routerLink="/admin" routerLinkActive="activo">Admin</a>
+      }
+      <button type="button" class="enlace-boton" (click)="salir()">Salir</button>
+    } @else {
+      <a routerLink="/cuenta/ingresar" routerLinkActive="activo">Ingresar</a>
+    }
+  </nav>
+</header>

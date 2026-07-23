@@ -1,0 +1,36 @@
+<div class="contenedor">
+  <h1>Pedidos</h1>
+
+  <div class="filtro">
+    <label>Filtrar por estado:</label>
+    <select [(ngModel)]="filtro" (ngModelChange)="cargar()">
+      <option value="">Todos</option>
+      @for (estado of estados; track estado) {
+        <option [value]="estado">{{ etiquetas[estado] }}</option>
+      }
+    </select>
+  </div>
+
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Pedido</th>
+        <th>Fecha</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (pedido of pedidos(); track pedido.id) {
+        <tr>
+          <td>#{{ pedido.id.slice(0, 8) }}</td>
+          <td>{{ pedido.createdAt | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ pedido.total | colones }}</td>
+          <td><span class="etiqueta-estado">{{ etiquetas[pedido.estado] }}</span></td>
+          <td><a [routerLink]="['/admin/pedidos', pedido.id]">Ver</a></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

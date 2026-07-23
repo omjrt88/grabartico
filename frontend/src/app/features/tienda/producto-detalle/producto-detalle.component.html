@@ -1,0 +1,113 @@
+<div class="contenedor" *ngIf="!cargando(); else cargandoTpl">
+  <div *ngIf="producto() as p; else noEncontrado" class="detalle">
+    <div class="carrusel">
+      @if (imagenesVisibles().length > 0) {
+        @for (imagen of imagenesVisibles(); track imagen.id) {
+          <img [src]="archivosUrl + imagen.url" [alt]="p.nombre" />
+        }
+      } @else {
+        <div class="sin-imagen">Sin imagen disponible para esta combinación</div>
+      }
+    </div>
+
+    <div class="info">
+      <h1>{{ p.nombre }}</h1>
+      <p class="descripcion">{{ p.descripcion }}</p>
+      <p class="precio">{{ precioUnitario() | colones }}</p>
+
+      @for (grupo of grupos(); track grupo.tipoId) {
+        <div class="campo">
+          <label>{{ grupo.nombre }}</label>
+          <div class="opciones">
+            @for (valor of grupo.valores; track valor.id) {
+              <button
+                type="button"
+                class="opcion"
+                [class.activa]="seleccion()[grupo.tipoId] === valor.id"
+                (click)="seleccionar(grupo.tipoId, valor.id)"
+              >
+                @if (valor.codigoColorHex) {
+                  <span class="muestra-color" [style.background]="valor.codigoColorHex"></span>
+                }
+                {{ valor.valor }}
+                @if (valor.modificadorPrecio) {
+                  <small>(+{{ valor.modificadorPrecio | colones }})</small>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="campo">
+        <label>Grabado</label>
+        <div class="opciones">
+          <button
+            type="button"
+            class="opcion"
+            [class.activa]="tipoGrabado() === 'DISENO_PREDETERMINADO'"
+            (click)="cambiarTipoGrabado('DISENO_PREDETERMINADO')"
+          >
+            Diseño predeterminado
+          </button>
+          <button
+            type="button"
+            class="opcion"
+            [class.activa]="tipoGrabado() === 'SUBIDO_CLIENTE'"
+            (click)="cambiarTipoGrabado('SUBIDO_CLIENTE')"
+          >
+            Subir mi propio diseño
+          </button>
+        </div>
+      </div>
+
+      @if (tipoGrabado() === 'DISENO_PREDETERMINADO') {
+        <div class="galeria-disenos">
+          @for (diseno of p.disenos; track diseno.id) {
+            <img
+              [src]="archivosUrl + diseno.url"
+              [alt]="diseno.nombre"
+              class="miniatura"
+              [class.activa]="disenoSeleccionado() === diseno.id"
+              (click)="disenoSeleccionado.set(diseno.id)"
+            />
+          }
+          @if (p.disenos.length === 0) {
+            <p>Este producto aún no tiene diseños predeterminados.</p>
+          }
+        </div>
+      } @else {
+        <div class="campo">
+          <input type="file" accept="image/*" (change)="onArchivoGrabado($event)" />
+          @if (subiendoGrabado()) {
+            <span>Subiendo...</span>
+          }
+          @if (grabadoUrl()) {
+            <span>Archivo listo ✓</span>
+          }
+        </div>
+      }
+
+      @if (mensaje()) {
+        <p class="error">{{ mensaje() }}</p>
+      }
+
+      <div class="campo">
+        <label>Cantidad</label>
+        <input type="number" min="1" [ngModel]="cantidad()" (ngModelChange)="cantidad.set($event)" />
+      </div>
+
+      <button type="button" class="boton" [disabled]="!puedeAgregar()" (click)="agregarAlCarrito()">
+        Agregar al carrito
+      </button>
+    </div>
+  </div>
+
+  <ng-template #noEncontrado>
+    <p>Producto no encontrado.</p>
+  </ng-template>
+</div>
+
+<ng-template #cargandoTpl>
+  <div class="contenedor"><p>Cargando producto...</p></div>
+</ng-template>

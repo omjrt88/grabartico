@@ -1,0 +1,58 @@
+<div class="contenedor">
+  <div class="encabezado-seccion">
+    <h1>Productos</h1>
+    <button type="button" class="boton" (click)="mostrarFormulario.set(!mostrarFormulario())">
+      {{ mostrarFormulario() ? 'Cancelar' : 'Nuevo producto' }}
+    </button>
+  </div>
+
+  @if (mostrarFormulario()) {
+    <div class="tarjeta formulario">
+      <div class="campo">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="nuevo.nombre" />
+      </div>
+      <div class="campo">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="nuevo.descripcion"></textarea>
+      </div>
+      <div class="campo">
+        <label>Precio base (₡)</label>
+        <input type="number" [(ngModel)]="nuevo.precioBase" />
+      </div>
+      <div class="campo">
+        <label>Stock inicial</label>
+        <input type="number" [(ngModel)]="nuevo.stock" />
+      </div>
+      <button type="button" class="boton" (click)="crear()">Guardar</button>
+    </div>
+  }
+
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Precio base</th>
+        <th>Stock</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (producto of productos(); track producto.id) {
+        <tr>
+          <td>{{ producto.nombre }}</td>
+          <td>{{ producto.precioBase | colones }}</td>
+          <td>{{ producto.stock }}</td>
+          <td>{{ producto.activo ? 'Activo' : 'Inactivo' }}</td>
+          <td class="acciones">
+            <a [routerLink]="['/admin/productos', producto.id]">Editar</a>
+            @if (producto.activo) {
+              <button type="button" class="enlace-boton" (click)="desactivar(producto)">Desactivar</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,49 @@
+<div class="contenedor" *ngIf="cliente() as c">
+  <h1>Mi perfil</h1>
+  <p><strong>{{ c.nombre }} {{ c.apellidos }}</strong></p>
+  <p>{{ c.usuario.email }}</p>
+  @if (c.telefono) {
+    <p>Tel: {{ c.telefono }}</p>
+  }
+
+  <h2>Mis direcciones</h2>
+  <div class="lista">
+    @for (direccion of c.direcciones; track direccion.id) {
+      <div class="tarjeta direccion">
+        <p>
+          {{ direccion.senasExactas }}, {{ direccion.distrito }}, {{ direccion.canton }}, {{ direccion.provincia }}
+        </p>
+        @if (direccion.esDefault) {
+          <span class="etiqueta-estado">Predeterminada</span>
+        } @else {
+          <button type="button" class="boton-secundario" (click)="marcarDefault(direccion)">Usar como predeterminada</button>
+        }
+        <button type="button" class="boton-secundario" (click)="eliminarDireccion(direccion)">Eliminar</button>
+      </div>
+    }
+  </div>
+
+  @if (!mostrarNueva()) {
+    <button type="button" class="boton" (click)="mostrarNueva.set(true)">Agregar dirección</button>
+  } @else {
+    <div class="tarjeta">
+      <div class="campo">
+        <label>Provincia</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.provincia" />
+      </div>
+      <div class="campo">
+        <label>Cantón</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.canton" />
+      </div>
+      <div class="campo">
+        <label>Distrito</label>
+        <input type="text" [(ngModel)]="nuevaDireccion.distrito" />
+      </div>
+      <div class="campo">
+        <label>Señas exactas</label>
+        <textarea [(ngModel)]="nuevaDireccion.senasExactas"></textarea>
+      </div>
+      <button type="button" class="boton" (click)="guardarDireccion()">Guardar</button>
+    </div>
+  }
+</div>

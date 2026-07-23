@@ -1,0 +1,37 @@
+<div class="contenedor">
+  <h1>Tu carrito</h1>
+
+  @if (carrito.listaItems().length === 0) {
+    <p>Tu carrito está vacío. <a routerLink="/">Ir a la tienda</a></p>
+  } @else {
+    <div class="lista">
+      @for (item of carrito.listaItems(); track $index) {
+        <div class="tarjeta item">
+          <div class="info">
+            <h3>{{ item.nombreProducto }}</h3>
+            <p>{{ item.atributosDescripcion }}</p>
+            <p>
+              Grabado:
+              {{ item.tipoGrabado === 'DISENO_PREDETERMINADO' ? item.disenoNombre : 'Diseño personalizado' }}
+            </p>
+            <p class="precio">{{ item.precioUnitario | colones }} c/u</p>
+          </div>
+          <div class="acciones">
+            <input
+              type="number"
+              min="1"
+              [ngModel]="item.cantidad"
+              (ngModelChange)="carrito.actualizarCantidad($index, $event)"
+            />
+            <button type="button" class="boton-secundario" (click)="carrito.eliminar($index)">Quitar</button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="resumen">
+      <p class="total">Total: {{ carrito.total() | colones }}</p>
+      <a routerLink="/checkout" class="boton">Proceder al pago</a>
+    </div>
+  }
+</div>

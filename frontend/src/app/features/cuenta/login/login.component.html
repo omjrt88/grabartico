@@ -1,0 +1,24 @@
+<div class="contenedor angosto">
+  <h1>Ingresar</h1>
+
+  <form (ngSubmit)="enviar()">
+    <div class="campo">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" [(ngModel)]="email" required />
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" name="password" [(ngModel)]="password" required />
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="boton" [disabled]="enviando()">
+      {{ enviando() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+
+  <p>¿No tienes cuenta? <a routerLink="/cuenta/registro">Regístrate aquí</a></p>
+</div>

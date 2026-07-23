@@ -1,0 +1,48 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  h3 {
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    margin: 0.15rem 0;
+  }
+
+  .precio {
+    font-weight: 600;
+  }
+}
+
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+
+  input {
+    width: 70px;
+    padding: 0.3rem;
+  }
+}
+
+.resumen {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .total {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}

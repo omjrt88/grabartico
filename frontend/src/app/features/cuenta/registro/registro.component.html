@@ -1,0 +1,36 @@
+<div class="contenedor angosto">
+  <h1>Crear cuenta</h1>
+
+  <form (ngSubmit)="enviar()">
+    <div class="campo">
+      <label>Nombre</label>
+      <input type="text" name="nombre" [(ngModel)]="datos.nombre" required />
+    </div>
+    <div class="campo">
+      <label>Apellidos</label>
+      <input type="text" name="apellidos" [(ngModel)]="datos.apellidos" required />
+    </div>
+    <div class="campo">
+      <label>Teléfono</label>
+      <input type="tel" name="telefono" [(ngModel)]="datos.telefono" />
+    </div>
+    <div class="campo">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" [(ngModel)]="datos.email" required />
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" name="password" [(ngModel)]="datos.password" required minlength="8" />
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="boton" [disabled]="enviando()">
+      {{ enviando() ? 'Creando cuenta...' : 'Crear cuenta' }}
+    </button>
+  </form>
+
+  <p>¿Ya tienes cuenta? <a routerLink="/cuenta/ingresar">Ingresa aquí</a></p>
+</div>
