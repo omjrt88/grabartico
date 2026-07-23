@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum RolUsuario {
+  ADMIN
+  CLIENTE
+}
+
+enum EstadoPedido {
+  ESPERANDO_PAGO
+  VERIFICANDO_PAGO
+  EN_PROGRESO
+  ENVIADO
+  ENTREGADO
+}
+
+enum TipoGrabado {
+  SUBIDO_CLIENTE
+  DISENO_PREDETERMINADO
+}
+
+// ---------------------------------------------------------------------------
+// Usuarios / Clientes
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String     @map("password_hash")
+  rol           RolUsuario @default(CLIENTE)
+  activo        Boolean    @default(true)
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  cliente       Cliente?
+  historial     HistorialEstado[] @relation("AdminHistorial")
+
+  @@map("usuarios")
+}
+
+model Cliente {
+  id          String   @id @default(uuid())
+  usuarioId   String   @unique @map("usuario_id")
+  nombre      String
+  apellidos   String
+  telefono    String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  direcciones Direccion[]
+  pedidos     Pedido[]
+
+  @@map("clientes")
+}
+
+model Direccion {
+  id          String   @id @default(uuid())
+  clienteId   String   @map("cliente_id")
+  provincia   String
+  canton      String
+  distrito    String
+  senasExactas String  @map("senas_exactas")
+  codigoPostal String? @map("codigo_postal")
+  esDefault   Boolean  @default(false) @map("es_default")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  pedidos     Pedido[]
+
+  @@map("direcciones")
+}
+
+// ---------------------------------------------------------------------------
+// Productos / Atributos
+// ---------------------------------------------------------------------------
+
+model Producto {
+  id          String   @id @default(uuid())
+  nombre      String
+  descripcion String?
+  precioBase  Decimal  @map("precio_base") @db.Decimal(12, 2)
+  stock       Int      @default(0)
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  atributoValores  ProductoAtributoValor[]
+  imagenes         ImagenProducto[]
+  disenos          DisenoPredeterminado[]
+  detallesPedido   DetallePedido[]
+
+  @@map("productos")
+}
+
+// Tipo de atributo: Material, Color, Forma
+model AtributoTipo {
+  id      String @id @default(uuid())
+  nombre  String @unique // "Material", "Color", "Forma"
+  orden   Int    @default(0)
+
+  valores AtributoValor[]
+
+  @@map("atributo_tipos")
+}
+
+// Valor concreto de un tipo: "Roble" (Material), "Rojo" (Color), "Circular" (Forma)
+model AtributoValor {
+  id             String @id @default(uuid())
+  atributoTipoId String @map("atributo_tipo_id")
+  valor          String
+  codigoColorHex String? @map("codigo_color_hex") // solo aplica si tipo = Color
+  orden          Int    @default(0)
+
+  atributoTipo         AtributoTipo             @relation(fields: [atributoTipoId], references: [id], onDelete: Cascade)
+  productos            ProductoAtributoValor[]
+  imagenesMapeadas     ImagenProductoAtributo[]
+  detallesPedidoValor  DetallePedidoAtributo[]
+
+  @@unique([atributoTipoId, valor])
+  @@map("atributo_valores")
+}
+
+// Relación producto <-> valor de atributo disponible, con modificador de precio
+model ProductoAtributoValor {
+  id                String  @id @default(uuid())
+  productoId        String  @map("producto_id")
+  atributoValorId   String  @map("atributo_valor_id")
+  modificadorPrecio Decimal @default(0) @map("modificador_precio") @db.Decimal(12, 2)
+  disponible        Boolean @default(true)
+
+  producto      Producto      @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  atributoValor AtributoValor @relation(fields: [atributoValorId], references: [id], onDelete: Cascade)
+
+  @@unique([productoId, atributoValorId])
+  @@map("producto_atributo_valores")
+}
+
+// ---------------------------------------------------------------------------
+// Imágenes de producto (carrusel dinámico)
+// ---------------------------------------------------------------------------
+
+model ImagenProducto {
+  id         String   @id @default(uuid())
+  productoId String   @map("producto_id")
+  url        String
+  orden      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  producto        Producto                 @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  atributosMapeo  ImagenProductoAtributo[]
+
+  @@map("imagenes_producto")
+}
+
+// Mapeo: esta imagen se muestra cuando el valor de atributo X está seleccionado
+model ImagenProductoAtributo {
+  id              String @id @default(uuid())
+  imagenId        String @map("imagen_id")
+  atributoValorId String @map("atributo_valor_id")
+
+  imagen        ImagenProducto @relation(fields: [imagenId], references: [id], onDelete: Cascade)
+  atributoValor AtributoValor  @relation(fields: [atributoValorId], references: [id], onDelete: Cascade)
+
+  @@unique([imagenId, atributoValorId])
+  @@map("imagenes_producto_atributos")
+}
+
+// ---------------------------------------------------------------------------
+// Diseños predeterminados (galería de grabado subida por admin)
+// ---------------------------------------------------------------------------
+
+model DisenoPredeterminado {
+  id         String   @id @default(uuid())
+  productoId String   @map("producto_id")
+  nombre     String
+  url        String
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  producto       Producto        @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  detallesPedido DetallePedido[]
+
+  @@map("disenos_predeterminados")
+}
+
+// ---------------------------------------------------------------------------
+// Pedidos
+// ---------------------------------------------------------------------------
+
+model Pedido {
+  id              String       @id @default(uuid())
+  clienteId       String       @map("cliente_id")
+  direccionId     String       @map("direccion_id")
+  estado          EstadoPedido @default(ESPERANDO_PAGO)
+  total           Decimal      @db.Decimal(12, 2)
+  comprobanteUrl  String?      @map("comprobante_url") // voucher SINPE/transferencia
+  trackingCorreos String?      @map("tracking_correos")
+  notaAdmin       String?      @map("nota_admin")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  cliente     Cliente            @relation(fields: [clienteId], references: [id])
+  direccion   Direccion          @relation(fields: [direccionId], references: [id])
+  detalles    DetallePedido[]
+  historial   HistorialEstado[]
+
+  @@map("pedidos")
+}
+
+model DetallePedido {
+  id                String      @id @default(uuid())
+  pedidoId          String      @map("pedido_id")
+  productoId        String      @map("producto_id")
+  cantidad          Int
+  precioUnitario    Decimal     @map("precio_unitario") @db.Decimal(12, 2)
+  tipoGrabado       TipoGrabado @map("tipo_grabado")
+  grabadoUrl        String?     @map("grabado_url") // si tipoGrabado = SUBIDO_CLIENTE
+  disenoId          String?     @map("diseno_id")   // si tipoGrabado = DISENO_PREDETERMINADO
+
+  pedido           Pedido                  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  producto         Producto                @relation(fields: [productoId], references: [id])
+  diseno           DisenoPredeterminado?   @relation(fields: [disenoId], references: [id])
+  atributosElegidos DetallePedidoAtributo[]
+
+  @@map("detalles_pedido")
+}
+
+// Snapshot de los valores de atributo elegidos en ese ítem (Material/Color/Forma + precio al momento de compra)
+model DetallePedidoAtributo {
+  id                String  @id @default(uuid())
+  detallePedidoId   String  @map("detalle_pedido_id")
+  atributoValorId   String  @map("atributo_valor_id")
+  modificadorPrecio Decimal @map("modificador_precio") @db.Decimal(12, 2)
+
+  detallePedido DetallePedido @relation(fields: [detallePedidoId], references: [id], onDelete: Cascade)
+  atributoValor AtributoValor @relation(fields: [atributoValorId], references: [id])
+
+  @@map("detalles_pedido_atributos")
+}
+
+// ---------------------------------------------------------------------------
+// Historial de estados
+// ---------------------------------------------------------------------------
+
+model HistorialEstado {
+  id         String       @id @default(uuid())
+  pedidoId   String       @map("pedido_id")
+  estado     EstadoPedido
+  adminId    String?      @map("admin_id") // null si el cambio fue automático (ej. ESPERANDO_PAGO)
+  nota       String?
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  pedido Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  admin  Usuario? @relation("AdminHistorial", fields: [adminId], references: [id])
+
+  @@map("historial_estados")
+}
