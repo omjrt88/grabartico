@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarritoService } from '../../../core/services/carrito.service';
 
@@ -14,9 +14,11 @@ export class HeaderComponent {
   constructor(
     public readonly auth: AuthService,
     public readonly carrito: CarritoService,
+    private readonly router: Router,
   ) {}
 
   salir(): void {
     this.auth.cerrarSesion();
+    this.router.navigate(['/']);
   }
 }

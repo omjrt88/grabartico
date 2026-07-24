@@ -8,7 +8,8 @@
     @if (auth.estaAutenticado()) {
       <a routerLink="/cuenta/pedidos" routerLinkActive="activo">Mis Pedidos</a>
       @if (auth.esAdmin()) {
-        <a routerLink="/admin" routerLinkActive="activo">Admin</a>
+        <a routerLink="/admin/productos" routerLinkActive="activo">Admin Productos</a>
+        <a routerLink="/admin/pedidos" routerLinkActive="activo">Admin Pedidos</a>
       }
       <button type="button" class="enlace-boton" (click)="salir()">Salir</button>
     } @else {
