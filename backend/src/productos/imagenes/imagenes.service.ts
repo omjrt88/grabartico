@@ -24,6 +24,25 @@ export class ImagenesService {
     });
   }
 
+  async actualizarMapeo(id: string, atributoValorIds: string[], orden?: number) {
+    const imagen = await this.prisma.imagenProducto.findUnique({ where: { id } });
+    if (!imagen) {
+      throw new NotFoundException('Imagen no encontrada.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.imagenProductoAtributo.deleteMany({ where: { imagenId: id } });
+      return tx.imagenProducto.update({
+        where: { id },
+        data: {
+          orden: orden ?? imagen.orden,
+          atributosMapeo: { create: atributoValorIds.map((atributoValorId) => ({ atributoValorId })) },
+        },
+        include: { atributosMapeo: true },
+      });
+    });
+  }
+
   async eliminar(id: string) {
     const imagen = await this.prisma.imagenProducto.findUnique({ where: { id } });
     if (!imagen) {

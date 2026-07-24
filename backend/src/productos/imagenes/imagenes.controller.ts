@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Param,
+  Patch,
   Post,
   UploadedFile,
   UseGuards,
@@ -39,6 +40,15 @@ export class ImagenesController {
     const url = `/uploads/productos/${file.filename}`;
 
     return this.imagenesService.agregar(productoId, url, atributoValorIds, orden);
+  }
+
+  @Patch(':imagenId')
+  actualizar(
+    @Param('imagenId') imagenId: string,
+    @Body('atributoValorIds') atributoValorIds: string[],
+    @Body('orden') orden?: number,
+  ) {
+    return this.imagenesService.actualizarMapeo(imagenId, atributoValorIds ?? [], orden);
   }
 
   @Delete(':imagenId')

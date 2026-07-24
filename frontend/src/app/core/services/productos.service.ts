@@ -62,6 +62,16 @@ export class ProductosService {
     return this.http.post(`${environment.apiUrl}/productos/${productoId}/imagenes`, formData);
   }
 
+  actualizarImagen(productoId: string, imagenId: string, atributoValorIds: string[]) {
+    return this.http.patch(`${environment.apiUrl}/productos/${productoId}/imagenes/${imagenId}`, {
+      atributoValorIds,
+    });
+  }
+
+  eliminarImagen(productoId: string, imagenId: string) {
+    return this.http.delete(`${environment.apiUrl}/productos/${productoId}/imagenes/${imagenId}`);
+  }
+
   listarDisenos(productoId: string) {
     return this.http.get<{ id: string; nombre: string; url: string }[]>(
       `${environment.apiUrl}/productos/${productoId}/disenos`,

@@ -27,6 +27,9 @@ export class AdminProductoEditarComponent implements OnInit {
   imagenSeleccionada: File | null = null;
   imagenAtributos: Record<string, boolean> = {};
 
+  readonly editandoImagenId = signal<string | null>(null);
+  imagenEditAtributos: Record<string, boolean> = {};
+
   disenoSeleccionado: File | null = null;
   disenoNombre = '';
 
@@ -106,6 +109,39 @@ export class AdminProductoEditarComponent implements OnInit {
       this.imagenAtributos = {};
       this.cargarProducto();
     });
+  }
+
+  etiquetaAtributoValor(atributoValorId: string): string {
+    const av = this.producto()?.atributoValores.find((a) => a.atributoValorId === atributoValorId);
+    return av ? `${av.atributoValor.atributoTipo?.nombre}: ${av.atributoValor.valor}` : atributoValorId;
+  }
+
+  editarEtiquetasImagen(imagen: Producto['imagenes'][number]): void {
+    const marcados = new Set(imagen.atributosMapeo.map((m) => m.atributoValorId));
+    this.imagenEditAtributos = Object.fromEntries(
+      (this.producto()?.atributoValores ?? []).map((av) => [av.atributoValorId, marcados.has(av.atributoValorId)]),
+    );
+    this.editandoImagenId.set(imagen.id);
+  }
+
+  cancelarEdicionImagen(): void {
+    this.editandoImagenId.set(null);
+    this.imagenEditAtributos = {};
+  }
+
+  guardarEtiquetasImagen(imagenId: string): void {
+    const atributoValorIds = Object.entries(this.imagenEditAtributos)
+      .filter(([, marcado]) => marcado)
+      .map(([id]) => id);
+
+    this.productosService.actualizarImagen(this.productoId, imagenId, atributoValorIds).subscribe(() => {
+      this.cancelarEdicionImagen();
+      this.cargarProducto();
+    });
+  }
+
+  eliminarImagen(imagenId: string): void {
+    this.productosService.eliminarImagen(this.productoId, imagenId).subscribe(() => this.cargarProducto());
   }
 
   onDisenoSeleccionado(evento: Event): void {

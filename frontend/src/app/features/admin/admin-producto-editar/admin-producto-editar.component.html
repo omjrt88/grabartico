@@ -63,9 +63,40 @@
 
   <div class="tarjeta seccion">
     <h2>Imágenes del carrusel</h2>
-    <div class="galeria">
+    <div class="galeria-imagenes">
       @for (imagen of p.imagenes; track imagen.id) {
-        <img [src]="archivosUrl + imagen.url" [alt]="p.nombre" class="miniatura" />
+        <div class="tarjeta-imagen">
+          <img [src]="archivosUrl + imagen.url" [alt]="p.nombre" class="miniatura" />
+
+          @if (editandoImagenId() === imagen.id) {
+            <div class="valores">
+              @for (av of p.atributoValores; track av.id) {
+                <label>
+                  <input type="checkbox" [(ngModel)]="imagenEditAtributos[av.atributoValorId]" name="edit-{{ imagen.id }}-{{ av.atributoValorId }}" />
+                  {{ av.atributoValor.atributoTipo?.nombre }}: {{ av.atributoValor.valor }}
+                </label>
+              }
+            </div>
+            <div class="acciones-imagen">
+              <button type="button" class="boton" (click)="guardarEtiquetasImagen(imagen.id)">Guardar</button>
+              <button type="button" class="boton-secundario" (click)="cancelarEdicionImagen()">Cancelar</button>
+            </div>
+          } @else {
+            <div class="etiquetas-imagen">
+              @for (mapeo of imagen.atributosMapeo; track mapeo.id) {
+                <span class="etiqueta-estado">
+                  {{ etiquetaAtributoValor(mapeo.atributoValorId) }}
+                </span>
+              } @empty {
+                <span class="sin-etiquetas">Sin características (siempre visible)</span>
+              }
+            </div>
+            <div class="acciones-imagen">
+              <button type="button" class="boton-secundario" (click)="editarEtiquetasImagen(imagen)">Editar etiquetas</button>
+              <button type="button" class="enlace-boton" (click)="eliminarImagen(imagen.id)">Eliminar</button>
+            </div>
+          }
+        </div>
       }
     </div>
 
