@@ -1,21 +1,17 @@
+.angosto {
+  max-width: 640px;
+}
+
+.ayuda {
+  color: #555;
+  font-size: 0.9rem;
+}
+
 .seccion {
   margin-top: 1.5rem;
 
   h2 {
     margin-top: 0;
-  }
-}
-
-.fila-enlace {
-  display: flex;
-  gap: 0.5rem;
-
-  input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.85rem;
   }
 }
 

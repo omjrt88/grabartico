@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { EstadoPedido } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrearPedidoDto } from './dto/crear-pedido.dto';
@@ -97,12 +98,56 @@ export class PedidosService {
         direccionId: dto.direccionId,
         total,
         comprobanteUrl,
+        tokenAcceso: randomBytes(24).toString('hex'),
         estado: 'ESPERANDO_PAGO',
         detalles: { create: detallesData },
         historial: { create: { estado: 'ESPERANDO_PAGO', nota: 'Comprobante de pago recibido.' } },
       },
       include: PEDIDO_INCLUDE,
     });
+  }
+
+  async obtenerPorToken(usuarioId: string, token: string) {
+    const cliente = await this.prisma.cliente.findUnique({ where: { usuarioId } });
+    const pedido = await this.prisma.pedido.findUnique({ where: { tokenAcceso: token }, include: PEDIDO_INCLUDE });
+    if (!pedido || !cliente || pedido.clienteId !== cliente.id) {
+      throw new NotFoundException('Pedido no encontrado.');
+    }
+    return { ...pedido, puedeActualizarComprobante: this.puedeActualizarComprobante(pedido) };
+  }
+
+  private puedeActualizarComprobante(pedido: { estado: EstadoPedido; historial: { estado: EstadoPedido }[] }) {
+    return pedido.estado === 'ESPERANDO_PAGO' && pedido.historial.some((h) => h.estado === 'VERIFICANDO_PAGO');
+  }
+
+  async actualizarComprobantePorToken(usuarioId: string, token: string, comprobanteUrl: string) {
+    const cliente = await this.prisma.cliente.findUnique({ where: { usuarioId } });
+    const pedido = await this.prisma.pedido.findUnique({
+      where: { tokenAcceso: token },
+      include: { historial: true },
+    });
+    if (!pedido || !cliente || pedido.clienteId !== cliente.id) {
+      throw new NotFoundException('Pedido no encontrado.');
+    }
+    if (pedido.estado !== 'ESPERANDO_PAGO') {
+      throw new BadRequestException('Ya no se puede actualizar el comprobante de este pedido.');
+    }
+
+    if (!this.puedeActualizarComprobante(pedido)) {
+      throw new BadRequestException(
+        'Tu comprobante ya fue recibido y está pendiente de revisión. Solo podrás subir uno nuevo si la tienda rechaza el pago.',
+      );
+    }
+
+    const actualizado = await this.prisma.pedido.update({
+      where: { id: pedido.id },
+      data: {
+        comprobanteUrl,
+        historial: { create: { estado: 'ESPERANDO_PAGO', nota: 'Comprobante actualizado por el cliente.' } },
+      },
+      include: PEDIDO_INCLUDE,
+    });
+    return { ...actualizado, puedeActualizarComprobante: this.puedeActualizarComprobante(actualizado) };
   }
 
   async listarPropios(usuarioId: string) {

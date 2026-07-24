@@ -16,6 +16,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/carrito/carrito.component').then((m) => m.CarritoComponent),
   },
   {
+    path: 'seguimiento/:token',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/seguimiento/seguimiento.component').then((m) => m.SeguimientoComponent),
+  },
+  {
     path: 'checkout',
     canActivate: [authGuard],
     loadComponent: () => import('./features/checkout/checkout.component').then((m) => m.CheckoutComponent),

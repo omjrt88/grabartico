@@ -2,6 +2,17 @@
   <h1>Pedido #{{ p.id.slice(0, 8) }}</h1>
   <span class="etiqueta-estado">{{ etiquetas[p.estado] }}</span>
 
+  <div class="tarjeta seccion enlace-seguimiento">
+    <h2>Enlace de seguimiento</h2>
+    <p>Guarda este enlace para volver directo a este pedido. Debes tener la sesión iniciada con tu cuenta para verlo.</p>
+    <div class="fila-enlace">
+      <input type="text" readonly [value]="enlaceSeguimiento(p)" />
+      <button type="button" class="boton-secundario" (click)="copiarEnlace(p)">
+        {{ copiado() ? 'Copiado ✓' : 'Copiar' }}
+      </button>
+    </div>
+  </div>
+
   <div class="tarjeta seccion">
     <h2>Artículos</h2>
     @for (detalle of p.detalles; track detalle.id) {

@@ -47,6 +47,8 @@ export interface Pedido {
   estado: EstadoPedido;
   total: string;
   comprobanteUrl: string | null;
+  tokenAcceso: string;
+  puedeActualizarComprobante?: boolean;
   trackingCorreos: string | null;
   notaAdmin: string | null;
   createdAt: string;

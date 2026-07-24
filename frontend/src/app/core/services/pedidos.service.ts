@@ -57,4 +57,14 @@ export class PedidosService {
       nota,
     });
   }
+
+  seguimientoPorToken(token: string) {
+    return this.http.get<Pedido>(`${environment.apiUrl}/pedidos/seguimiento/${token}`);
+  }
+
+  actualizarComprobantePorToken(token: string, comprobante: File) {
+    const formData = new FormData();
+    formData.append('comprobante', comprobante);
+    return this.http.post<Pedido>(`${environment.apiUrl}/pedidos/seguimiento/${token}/comprobante`, formData);
+  }
 }

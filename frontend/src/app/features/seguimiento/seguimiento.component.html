@@ -1,0 +1,74 @@
+<div class="contenedor angosto">
+  @if (cargando()) {
+    <p>Cargando pedido...</p>
+  }
+
+  @if (!cargando() && noEncontrado()) {
+    <h1>Pedido no encontrado</h1>
+    <p>Verifica que el enlace de seguimiento sea correcto, o que hayas iniciado sesión con la cuenta que hizo el pedido.</p>
+  }
+
+  @if (!cargando() && !noEncontrado() && pedido(); as p) {
+    <h1>Pedido #{{ p.id.slice(0, 8) }}</h1>
+    <span class="etiqueta-estado">{{ etiquetas[p.estado] }}</span>
+
+    <p class="ayuda">Guarda este enlace: puedes volver a él en cualquier momento para ver el estado de tu pedido.</p>
+
+    <div class="tarjeta seccion">
+      <h2>Artículos</h2>
+      @for (detalle of p.detalles; track detalle.id) {
+        <div class="detalle-item">
+          <p><strong>{{ detalle.cantidad }} x {{ detalle.producto.nombre }}</strong></p>
+          <p>
+            @for (atributo of detalle.atributosElegidos; track atributo.id) {
+              {{ atributo.atributoValor.atributoTipo.nombre }}: {{ atributo.atributoValor.valor }}{{ ' ' }}
+            }
+          </p>
+        </div>
+      }
+      <p class="total">Total: {{ p.total | colones }}</p>
+    </div>
+
+    @if (p.estado === 'ESPERANDO_PAGO') {
+      <div class="tarjeta seccion">
+        <h2>Comprobante de pago</h2>
+        @if (p.puedeActualizarComprobante) {
+          <p>
+            La tienda rechazó tu comprobante anterior. Sube uno nuevo (SINPE Móvil o transferencia) para que lo
+            revisen de nuevo.
+          </p>
+          <input type="file" accept="image/*,application/pdf" [disabled]="subiendo()" (change)="onComprobante($event)" />
+          @if (subiendo()) {
+            <p>Subiendo...</p>
+          }
+          @if (mensaje()) {
+            <p>{{ mensaje() }}</p>
+          }
+        } @else {
+          <p>Tu comprobante ya fue recibido y está pendiente de revisión por la tienda.</p>
+        }
+      </div>
+    }
+
+    @if (p.trackingCorreos) {
+      <div class="tarjeta seccion">
+        <h2>Envío</h2>
+        <p>Tracking Correos de Costa Rica: <strong>{{ p.trackingCorreos }}</strong></p>
+      </div>
+    }
+
+    <div class="tarjeta seccion">
+      <h2>Historial</h2>
+      <ul class="historial">
+        @for (evento of p.historial; track evento.id) {
+          <li>
+            <strong>{{ etiquetas[evento.estado] }}</strong> — {{ evento.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+            @if (evento.nota) {
+              <div>{{ evento.nota }}</div>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>
