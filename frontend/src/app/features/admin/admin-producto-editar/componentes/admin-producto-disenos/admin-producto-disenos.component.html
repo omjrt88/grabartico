@@ -1,0 +1,14 @@
+<div class="galeria">
+  @for (diseno of producto.disenos; track diseno.id) {
+    <div class="diseno">
+      <img [src]="archivosUrl + diseno.url" [alt]="diseno.nombre" class="miniatura" />
+      <span>{{ diseno.nombre }}</span>
+    </div>
+  }
+</div>
+
+<div class="subir-imagen">
+  <input type="text" placeholder="Nombre del diseño" [(ngModel)]="disenoNombre" />
+  <input type="file" accept="image/*" (change)="onDisenoSeleccionado($event)" />
+  <button type="button" class="boton" (click)="subirDiseno()">Subir diseño</button>
+</div>

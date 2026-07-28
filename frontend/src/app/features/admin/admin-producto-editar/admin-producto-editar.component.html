@@ -26,110 +26,16 @@
 
   <div class="tarjeta seccion">
     <h2>Características (Material, Color, Forma)</h2>
-
-    @for (tipo of tiposAtributo(); track tipo.id) {
-      <div class="grupo-tipo">
-        <h3>{{ tipo.nombre }}</h3>
-        <div class="valores">
-          @for (valor of tipo.valores; track valor.id) {
-            <div class="valor-fila">
-              <span>{{ valor.valor }}</span>
-              @if (yaAsignado(valor.id)) {
-                <span class="etiqueta-estado">Asignado</span>
-              } @else {
-                <input
-                  type="number"
-                  placeholder="Modificador ₡"
-                  [(ngModel)]="nuevoModificador[valor.id]"
-                  name="mod-{{ valor.id }}"
-                />
-                <button type="button" class="boton-secundario" (click)="asignar(valor.id)">Asignar a este producto</button>
-              }
-            </div>
-          }
-        </div>
-        <div class="agregar-valor">
-          <input type="text" placeholder="Nuevo valor" [(ngModel)]="nuevoValorPorTipo[tipo.id]" name="valor-{{ tipo.id }}" />
-          <button type="button" class="boton-secundario" (click)="crearValor(tipo.id)">Agregar valor</button>
-        </div>
-      </div>
-    }
-
-    <div class="agregar-tipo">
-      <input type="text" placeholder="Nuevo tipo de característica" [(ngModel)]="nuevoTipoNombre" />
-      <button type="button" class="boton-secundario" (click)="crearTipo()">Agregar tipo</button>
-    </div>
+    <app-admin-producto-atributos [producto]="p" [productoId]="productoId" (actualizado)="cargarProducto()" />
   </div>
 
   <div class="tarjeta seccion">
     <h2>Imágenes del carrusel</h2>
-    <div class="galeria-imagenes">
-      @for (imagen of p.imagenes; track imagen.id) {
-        <div class="tarjeta-imagen">
-          <img [src]="archivosUrl + imagen.url" [alt]="p.nombre" class="miniatura" />
-
-          @if (editandoImagenId() === imagen.id) {
-            <div class="valores">
-              @for (av of p.atributoValores; track av.id) {
-                <label>
-                  <input type="checkbox" [(ngModel)]="imagenEditAtributos[av.atributoValorId]" name="edit-{{ imagen.id }}-{{ av.atributoValorId }}" />
-                  {{ av.atributoValor.atributoTipo?.nombre }}: {{ av.atributoValor.valor }}
-                </label>
-              }
-            </div>
-            <div class="acciones-imagen">
-              <button type="button" class="boton" (click)="guardarEtiquetasImagen(imagen.id)">Guardar</button>
-              <button type="button" class="boton-secundario" (click)="cancelarEdicionImagen()">Cancelar</button>
-            </div>
-          } @else {
-            <div class="etiquetas-imagen">
-              @for (mapeo of imagen.atributosMapeo; track mapeo.id) {
-                <span class="etiqueta-estado">
-                  {{ etiquetaAtributoValor(mapeo.atributoValorId) }}
-                </span>
-              } @empty {
-                <span class="sin-etiquetas">Sin características (siempre visible)</span>
-              }
-            </div>
-            <div class="acciones-imagen">
-              <button type="button" class="boton-secundario" (click)="editarEtiquetasImagen(imagen)">Editar etiquetas</button>
-              <button type="button" class="enlace-boton" (click)="eliminarImagen(imagen.id)">Eliminar</button>
-            </div>
-          }
-        </div>
-      }
-    </div>
-
-    <div class="subir-imagen">
-      <input type="file" accept="image/*" (change)="onImagenSeleccionada($event)" />
-      <p>Marca las características para las que aplica esta imagen:</p>
-      <div class="valores">
-        @for (av of p.atributoValores; track av.id) {
-          <label>
-            <input type="checkbox" [(ngModel)]="imagenAtributos[av.atributoValorId]" />
-            {{ av.atributoValor.atributoTipo?.nombre }}: {{ av.atributoValor.valor }}
-          </label>
-        }
-      </div>
-      <button type="button" class="boton" (click)="subirImagen()">Subir imagen</button>
-    </div>
+    <app-admin-producto-imagenes [producto]="p" [productoId]="productoId" (actualizado)="cargarProducto()" />
   </div>
 
   <div class="tarjeta seccion">
     <h2>Diseños predeterminados de grabado</h2>
-    <div class="galeria">
-      @for (diseno of p.disenos; track diseno.id) {
-        <div class="diseno">
-          <img [src]="archivosUrl + diseno.url" [alt]="diseno.nombre" class="miniatura" />
-          <span>{{ diseno.nombre }}</span>
-        </div>
-      }
-    </div>
-
-    <div class="subir-imagen">
-      <input type="text" placeholder="Nombre del diseño" [(ngModel)]="disenoNombre" />
-      <input type="file" accept="image/*" (change)="onDisenoSeleccionado($event)" />
-      <button type="button" class="boton" (click)="subirDiseno()">Subir diseño</button>
-    </div>
+    <app-admin-producto-disenos [producto]="p" [productoId]="productoId" (actualizado)="cargarProducto()" />
   </div>
 </div>
